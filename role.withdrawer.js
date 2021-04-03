@@ -39,7 +39,7 @@ var roleWithdrawer = {
             creep.memory.transfering = creep.store.getUsedCapacity() > 0;
         } else {
             creep.memory.transfering = creep.store.getUsedCapacity() > 0;
-            creep.moveTo(restFlag)
+            creep.moveTo(restFlag);
         }
     }
 };

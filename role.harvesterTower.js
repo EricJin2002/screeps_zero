@@ -2,16 +2,16 @@ var roleHarvesterTower = {
 
     run: function (creep, source, tower) {
 
-        if (creep.memory.transfering && creep.store[RESOURCE_ENERGY] == 0) {
-            creep.memory.transfering = false;
+        if (creep.memory.transferingTower && creep.store[RESOURCE_ENERGY] == 0) {
+            creep.memory.transferingTower = false;
             creep.say('🔄 harvest');
         }
-        if (!creep.memory.transfering && creep.store.getFreeCapacity() == 0) {
-            creep.memory.transfering = true;
+        if (!creep.memory.transferingTower && creep.store.getFreeCapacity() == 0) {
+            creep.memory.transferingTower = true;
             creep.say('🚧 transfer');
         }
 
-        if (creep.memory.transfering) {
+        if (creep.memory.transferingTower) {
             if (creep.transfer(tower, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
                 creep.moveTo(tower, { visualizePathStyle: { stroke: '#ffffff' } });
             }

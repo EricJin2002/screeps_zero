@@ -2,7 +2,7 @@ var roleHarvester = {
 
     run: function (creep, source, idealStructureTypes, restFlag = creep.room.find(FIND_FLAGS)[1]) {
 
-        if (creep.memory.transfering && creep.store[RESOURCE_ENERGY] == 0) {
+        if (creep.memory.transfering && creep.store.getUsedCapacity() == 0) {
             creep.memory.transfering = false;
             creep.say('🔄 harvest');
         }
@@ -15,12 +15,18 @@ var roleHarvester = {
             var target = creep.pos.findClosestByRange(FIND_STRUCTURES, {
                 filter: (structure) => {
                     return idealStructureTypes.includes(structure.structureType) &&
-                        structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0 
+                        structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0
                 }
             });
             if (target) {
+                /*
                 if (creep.transfer(target, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
                     creep.moveTo(target, { visualizePathStyle: { stroke: '#ffffff' } });
+                }*/
+                for (const resourceType in creep.store) {
+                    if (creep.transfer(target, resourceType) == ERR_NOT_IN_RANGE) {
+                        creep.moveTo(target, { visualizePathStyle: { stroke: '#ffffff' } });
+                    }
                 }
             } else {
                 creep.moveTo(restFlag);
