@@ -6,12 +6,14 @@ var roleProcessor = {
         } else {
             if (linkHarvest.store[RESOURCE_ENERGY] < 200 && linkUpgrade.store[RESOURCE_ENERGY] < 400) {
                 if (creep.transfer(linkSelf, RESOURCE_ENERGY) == ERR_NOT_ENOUGH_RESOURCES &&
-                    creep.room.storage.store[RESOURCE_ENERGY] > 40000) {
+                    creep.room.storage.store[RESOURCE_ENERGY] > 100000) {
                     creep.withdraw(creep.room.storage, RESOURCE_ENERGY);
                 }
                 linkSelf.transferEnergy(linkUpgrade);
             } else {
-                if (creep.transfer(creep.room.storage, RESOURCE_ENERGY) == ERR_NOT_ENOUGH_RESOURCES) {
+                var target = creep.room.terminal.store.getUsedCapacity([RESOURCE_ENERGY]) < 10000 ?
+                    creep.room.terminal : creep.room.storage;
+                if (creep.transfer(target, RESOURCE_ENERGY) == ERR_NOT_ENOUGH_RESOURCES) {
                     creep.withdraw(linkSelf, RESOURCE_ENERGY);
                 }
             }
