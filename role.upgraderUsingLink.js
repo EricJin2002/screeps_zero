@@ -20,7 +20,7 @@ var roleUpgraderUsingLink = {
             }
 
             if (creep.memory.upgrading) {
-                Math.random() > 0.5 ?
+                Math.random() > 0.7 ?
                     creep.upgradeController(creep.room.controller) :
                     creep.repair(Game.getObjectById(repairTargetIDs[
                         Game.getObjectById(repairTargetIDs[0]).hits < Game.getObjectById(repairTargetIDs[1]).hits ?

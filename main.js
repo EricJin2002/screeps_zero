@@ -22,7 +22,7 @@ var numForEachType1 = {
     'builderLD1': 0,
     'invader1': 0,
 
-    'carrierL01': 0,
+    'carrierL01': 1,
     'harvesterM1': 1,
     'harvesterLD01': 0,
     'harvesterLD11': 2,
@@ -84,6 +84,7 @@ const myEnergyStructures1 = [].concat(extensions1, Game.spawns['Spawn1']);
 const towers1 = Game.spawns['Spawn1'].room.find(FIND_STRUCTURES, {
     filter: (object) => object.structureType == STRUCTURE_TOWER
 });
+const towerIDs1 = ['605de601c2c8a559d4ee74a1', '605ff7eb7ed7b9da231972ef'];
 const linkIDs1 = ['60607d7dcea495400d10beea', '606086e10db288023180a0cf', '6068687e2bb56182b9b8e056'];
 const mineral1 = Game.spawns['Spawn1'].room.find(FIND_MINERALS)[0];
 const labs1 = ['606be696d5ec7212ad842ceb', '606d65ef43efe504028fad9a', '606ca60b225c833fc17119c4'];
@@ -110,10 +111,10 @@ const roleForEachType2 = {
     'upgrader02': [MOVE, WORK, CARRY, MOVE],
     'upgrader12': [MOVE, WORK, CARRY, MOVE],
     'harvesterT12': [MOVE, WORK, CARRY, MOVE],
-    'harvesterT02': [MOVE, WORK, CARRY, MOVE, WORK, CARRY],
+    'harvesterT02': [MOVE, WORK, CARRY, MOVE, WORK, CARRY, MOVE, WORK, CARRY],
     'upgraderUC2': [WORK, WORK, WORK, WORK, WORK, WORK, CARRY, MOVE],
     'harvester12': [MOVE, WORK, CARRY, MOVE],
-    'harvester02': [MOVE, WORK, CARRY, MOVE, WORK, CARRY]
+    'harvester02': [MOVE, WORK, CARRY, MOVE, WORK, CARRY, MOVE, WORK, CARRY]
 
 }
 
@@ -126,6 +127,7 @@ const myEnergyStructures2 = [].concat(extensions2, Game.spawns['Spawn2']);
 const towers2 = Game.spawns['Spawn2'].room.find(FIND_STRUCTURES, {
     filter: (object) => object.structureType == STRUCTURE_TOWER
 });
+const towerIDs2 = ['6066b5e65abcd7285285abea', '606c30f908f9f2d043cf7a1a'];
 const containerIDs2 = ['6065c2d43bc5866af992aebd'];
 
 
@@ -274,6 +276,8 @@ module.exports.loop = function () {
             });
         */
 
+        //lab
+        Game.getObjectById(labs1[2]).runReaction(Game.getObjectById(labs1[0]), Game.getObjectById(labs1[1]));
     }
 
     //room2
@@ -420,16 +424,16 @@ module.exports.loop = function () {
                         [STRUCTURE_EXTENSION, STRUCTURE_SPAWN], Game.flags.Harv1); break;
             } case 'harvesterT01': {
                 if (towers1[1]) {
-                    if (creep.memory.tower && towers1[1].store.getFreeCapacity([RESOURCE_ENERGY]) == 0) {
+                    if (creep.memory.tower && Game.getObjectById(towerIDs1[1]).store.getFreeCapacity([RESOURCE_ENERGY]) == 0) {
                         creep.memory.tower = false;
                         creep.say('🔄 harvestT_end');
                     }
-                    if (!creep.memory.tower && towers1[1].store.getFreeCapacity([RESOURCE_ENERGY]) > 100) {
+                    if (!creep.memory.tower && Game.getObjectById(towerIDs1[1]).store.getFreeCapacity([RESOURCE_ENERGY]) > 100) {
                         creep.memory.tower = true;
                         creep.say('⚡ harvestT_begin');
                     }
                     if (creep.memory.tower) {
-                        roleHarvesterTower.run(creep, source01, towers1[1]); break;
+                        roleHarvesterTower.run(creep, source01, Game.getObjectById(towerIDs1[1])); break;
                     }
                 }
                 roleHarvester.run(creep, source01,
@@ -439,16 +443,16 @@ module.exports.loop = function () {
                         [STRUCTURE_EXTENSION, STRUCTURE_SPAWN], Game.flags.Harv1); break;
             } case 'harvesterT11': {
                 if (towers1[0]) {
-                    if (creep.memory.tower && towers1[0].store.getFreeCapacity([RESOURCE_ENERGY]) == 0) {
+                    if (creep.memory.tower && Game.getObjectById(towerIDs1[0]).store.getFreeCapacity([RESOURCE_ENERGY]) == 0) {
                         creep.memory.tower = false;
                         creep.say('🔄 harvestT_end');
                     }
-                    if (!creep.memory.tower && towers1[0].store.getFreeCapacity([RESOURCE_ENERGY]) > 100) {
+                    if (!creep.memory.tower && Game.getObjectById(towerIDs1[0]).store.getFreeCapacity([RESOURCE_ENERGY]) > 100) {
                         creep.memory.tower = true;
                         creep.say('⚡ harvestT_begin');
                     }
                     if (creep.memory.tower) {
-                        roleHarvesterTower.run(creep, source11, towers1[0]); break;
+                        roleHarvesterTower.run(creep, source11, Game.getObjectById(towerIDs1[0])); break;
                     }
                 }
                 roleHarvester.run(creep, source11,
@@ -486,13 +490,15 @@ module.exports.loop = function () {
                 roleHarvesterLongDistance.run(creep, 'E28N54', 'E29N54', Game.rooms['E28N54'].storage); break;
             } case 'carrierL01': {
                 //roleCarrier.run(creep, Game.rooms['E28N54'].storage, Game.getObjectById(labs1[0]), [RESOURCE_ENERGY, RESOURCE_HYDROGEN]); break;
-                roleCarrier.run(creep, Game.rooms['E28N54'].terminal, Game.getObjectById(labs1[1]), [RESOURCE_ENERGY, RESOURCE_OXYGEN]); break;
-                
+                roleCarrier.run(creep, Game.rooms['E28N54'].terminal, Game.getObjectById(labs1[2]), [RESOURCE_ENERGY]); break;
+
             }
             //room2
             case 'harvester02': {
                 roleHarvester.run(creep, source02,
-                    [STRUCTURE_SPAWN, STRUCTURE_CONTAINER], Game.flags.Harv2); break;
+                    Game.getObjectById(containerIDs2[0]).store.getFreeCapacity([RESOURCE_ENERGY]) == 0 ?
+                        [STRUCTURE_SPAWN, STRUCTURE_STORAGE] :
+                        [STRUCTURE_SPAWN, STRUCTURE_CONTAINER], Game.flags.Harv2); break;
             } case 'harvester12': {
                 roleHarvester.run(creep, source12,
                     Game.spawns['Spawn2'].room.energyAvailable ==
@@ -502,7 +508,11 @@ module.exports.loop = function () {
                             [STRUCTURE_EXTENSION, STRUCTURE_SPAWN, STRUCTURE_CONTAINER]) :
                         [STRUCTURE_EXTENSION, STRUCTURE_SPAWN], Game.flags.Harv21); break;
             } case 'harvesterT02': {
-                roleHarvester.run(creep, source02, [STRUCTURE_TOWER], Game.flags.Harv2); break;
+                if (Game.getObjectById(towerIDs2[1]).store.getFreeCapacity([RESOURCE_ENERGY]) > 0) {
+                    roleHarvesterTower.run(creep, source02, Game.getObjectById(towerIDs2[1]));
+                } else {
+                    roleHarvesterTower.run(creep, source02, Game.getObjectById(towerIDs2[0]));
+                } break;
                 /*
                 if (creep.memory.tower && towers2[0].store.getFreeCapacity([RESOURCE_ENERGY]) == 0) {
                     creep.memory.tower = false;
