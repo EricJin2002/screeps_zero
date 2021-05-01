@@ -5,6 +5,11 @@ var roleClaimer = {
             const exit = creep.pos.findClosestByRange(exitDir);
             creep.moveTo(exit, { visualizePathStyle: { stroke: '#ffaa00' } });
         } else {
+            if(creep.reserveController(creep.room.controller)==ERR_NOT_IN_RANGE){
+                creep.moveTo(creep.room.controller);
+            }
+            //console.log(creep.signController(creep.room.controller, '物競，天擇，效實，儲能'));
+            /*
             if (!creep.memory.claimed && creep.room.controller) {
                 if (creep.claimController(creep.room.controller) == ERR_NOT_IN_RANGE) {
                     creep.moveTo(creep.room.controller);
@@ -18,7 +23,7 @@ var roleClaimer = {
                         creep.moveTo(creep.room.controller);
                     }
                 }
-            }
+            }*/
         }
     }
 }

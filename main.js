@@ -1,44 +1,57 @@
 
 const roleHarvester = require('role.harvesterV2');
 const roleHarvesterTower = require('role.harvesterTower');
+const roleHarvesterDeposit = require('role.harvesterDeposit');
 const roleHarvesterLongDistance = require('role.harvesterLongDistance');
+const roleHarvesterLongDistanceBoost = require('role.harvesterLongDistanceBoost');
 const roleUpgrader = require('role.upgrader');
 const roleUpgraderUsingContainer = require('role.upgraderUsingContainer');
 const roleUpgraderUsingLink = require('role.upgraderUsingLink');
-const roleBuilder = require('role.builder');
+const roleUpgraderLongDistance = require('role.upgraderLongDistance');
+const roleUpgraderLongDistanceBoost = require('role.upgraderLongDistanceBoost')
+const roleBuilder = require('role.builderV2');
 const roleAttacker = require('role.attacker');
 const roleWithdrawer = require('role.withdrawer');
 const roleRepairer = require('role.repairerV2');
 const roleUrgentShifter = require('role.urgentShifter');
-const roleProcessor = require('role.processor');
+const roleProcessor = require('role.processorV2');
+const roleProcessor2 = require('role.processor2');
 const roleClaimer = require('role.claimer');
 const roleBuilderLongDistance = require('role.builderLongDistance');
 const roleInvader = require('role.invader');
+const roleHealer = require('role.healer');
 const roleCarrier = require('role.carrier');
+const autoMarket = require('auto.market');
+const roleProcessor3 = require('role.processor3');
+
 
 //local at room1
 var numForEachType1 = {
-    'claimer1': 0,
+    'claimer01': 1,
+    'claimer11': 0,
     'builderLD1': 0,
-    'invader1': 0,
+    'invader1': 1,
+    'defender01': 1,
+    'healer1': 0,//too expensive
 
     'carrierL01': 1,
     'harvesterM1': 1,
     'harvesterLD01': 0,
     'harvesterLD11': 2,
+    'upgraderLD11': 2,
     'repairer01': 1,
     'repairer11': 1,
     'upgraderUL1': 1,
-    'builder01': 1,
+    'builder01': 0,
     'builder11': 1,
     'urgentShifter1': 0,
     'upgrader01': 0,
-    'upgrader11': 2,
+    'upgrader11': 1,
     'upgraderUC1': 0,
     'processor1': 1,
     'withdrawer1': 1,
     'harvesterT01': 1,
-    'harvesterT11': 2,
+    'harvesterT11': 1,
     'harvester01': 2,
     'harvester11': 1
 }
@@ -48,34 +61,39 @@ const roleForEachType1 = {
     'carrierL01': [MOVE, CARRY, MOVE, CARRY],
     'harvesterM1': [WORK, MOVE, CARRY, MOVE, MOVE, WORK, CARRY, MOVE],
     'harvesterLD01': [WORK, MOVE, CARRY, MOVE, MOVE, WORK, CARRY, MOVE],
-    'harvesterLD11': [WORK, MOVE, CARRY, MOVE, MOVE, WORK, CARRY, MOVE],
-    'repairer01': [WORK, MOVE, MOVE, WORK, CARRY, MOVE],
-    'repairer11': [WORK, MOVE, MOVE, WORK, CARRY, MOVE],
-    'upgraderUL1': [WORK, WORK, WORK, WORK, WORK, CARRY, MOVE],
+    'harvesterLD11': [WORK, MOVE, CARRY, MOVE, MOVE, WORK, CARRY, MOVE, MOVE, WORK, CARRY, MOVE],
+    'upgraderLD11': [WORK, MOVE, CARRY, MOVE, MOVE, WORK, CARRY, MOVE, MOVE, WORK, CARRY, MOVE],
+    'repairer01': [MOVE, WORK, CARRY, MOVE],
+    'repairer11': [WORK, CARRY, MOVE],
+    'upgraderUL1': [WORK, WORK, WORK, WORK, WORK, WORK, CARRY, MOVE, MOVE],
     'builder01': [WORK, CARRY, MOVE, WORK, CARRY, MOVE, WORK, CARRY, MOVE],
-    'builder11': [WORK, CARRY, MOVE, WORK, CARRY, MOVE, WORK, CARRY, MOVE],
+    'builder11': [WORK, CARRY, MOVE, WORK, CARRY, MOVE, WORK, CARRY, MOVE, WORK, CARRY, MOVE],
     'upgrader01': [MOVE, WORK, CARRY, MOVE],
     'upgrader11': [WORK, CARRY, MOVE, WORK, CARRY, MOVE],
     'upgraderUC1': [WORK, WORK, WORK, CARRY, MOVE, MOVE],
     'processor1': [MOVE, CARRY],
     'withdrawer1': [MOVE, CARRY, MOVE, CARRY],
-    'harvesterT01': [WORK, CARRY, MOVE, WORK, CARRY, MOVE, WORK, CARRY, MOVE],
+    'harvesterT01': [WORK, CARRY, MOVE, WORK, CARRY, MOVE, WORK, CARRY, MOVE, WORK, CARRY, MOVE],
     'harvesterT11': [WORK, CARRY, MOVE, WORK, CARRY, MOVE, WORK, CARRY, MOVE],
     'harvester01': [WORK, CARRY, MOVE, WORK, CARRY, MOVE, WORK, CARRY, MOVE],
     'harvester11': [MOVE, WORK, CARRY, MOVE],
 
-    'attacker1': [TOUGH, TOUGH, MOVE, MOVE, MOVE, ATTACK, MOVE, ATTACK],
+    'attacker1': [TOUGH, TOUGH, MOVE, MOVE, MOVE, ATTACK, MOVE, ATTACK, MOVE, ATTACK],
     'urgentShifter1': [MOVE, CARRY],
-    'claimer1': [CLAIM, MOVE],
-    'builderLD1': [MOVE, WORK, WORK, CARRY, MOVE, MOVE],
-    'invader1': [TOUGH, TOUGH, MOVE, MOVE, ATTACK, ATTACK, MOVE, MOVE]
+    'claimer01': [CLAIM, MOVE, CLAIM, MOVE],
+    'claimer11': [CLAIM, MOVE, CLAIM, MOVE],
+    'builderLD1': [MOVE, WORK, CARRY, MOVE, WORK, CARRY, MOVE, MOVE],
+    'invader1': [TOUGH, TOUGH, MOVE, MOVE, ATTACK, ATTACK, MOVE, MOVE],
+    'defender01': [TOUGH, TOUGH, MOVE, MOVE, ATTACK, ATTACK, MOVE, MOVE],
+    //'healer1': [TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, MOVE, MOVE, MOVE, MOVE],
+    'healer1': [CLAIM, CLAIM, MOVE, MOVE]
 }
 
 const source01 = Game.rooms['E28N54'].find(FIND_SOURCES)[0];
 const source11 = Game.rooms['E28N54'].find(FIND_SOURCES)[1];
 const repairTargetIDs1 = [
     ['605e7b225734153db6bfe52e', '605e7b1f0db288c02a7fd218', '605eb934c5078bec4245e690', '605eb9376389e1d3fd4a4837', '605ec701b1432e75d6f16fe8'],
-    ['6060a36897b43ed29344c271', '6060a35ab20e44375d43b5f3', '6060a351573415256ec0b51f', '6060a357670d4bb48490c321', '6060a3651f5d1e0632d2c36d', '6060a5221ee4c10063d59524']
+    ['6083ddfb8227a42563b6cc1d', '6060a36897b43ed29344c271', '6060a35ab20e44375d43b5f3', '6060a351573415256ec0b51f', '6060a357670d4bb48490c321', '6060a3651f5d1e0632d2c36d', '6060a5221ee4c10063d59524']
 ];
 const extensions1 = Game.spawns['Spawn1'].room.find(FIND_MY_STRUCTURES, {
     filter: { structureType: STRUCTURE_EXTENSION }
@@ -88,34 +106,45 @@ const towerIDs1 = ['605de601c2c8a559d4ee74a1', '605ff7eb7ed7b9da231972ef'];
 const linkIDs1 = ['60607d7dcea495400d10beea', '606086e10db288023180a0cf', '6068687e2bb56182b9b8e056'];
 const mineral1 = Game.spawns['Spawn1'].room.find(FIND_MINERALS)[0];
 const labs1 = ['606be696d5ec7212ad842ceb', '606d65ef43efe504028fad9a', '606ca60b225c833fc17119c4'];
+const factory1 = ['60833d87f52e0f79452a22fa'];
+
 
 //local at room2
 var numForEachType2 = {
 
+    'harvesterM2': 1,
+    'processor2': 1,
     'builder02': 0,
     'builder12': 2,
-    'upgrader02': 1,
-    'upgrader12': 2,
+    'urgentShifter2': 0,
+    'upgrader02': 0,
+    'upgrader12': 0,
     'harvesterT12': 0,
     'harvesterT02': 1,
     'upgraderUC2': 1,
-    'harvester12': 3,
-    'harvester02': 2
+    'harvester12': 2,
+    'harvester02': 2,
+    'harvester012': 1
 
 }
-const warTypes2 = ['upgrader02', 'upgrader12', 'harvesterT12', 'harvesterT02', 'upgraderUC2', 'harvester12', 'harvester02']
+const warTypes2 = ['urgentShifter2', 'attacker2', 'processor2', 'upgrader02', 'upgrader12', 'harvesterT12', 'harvesterT02', 'upgraderUC2', 'harvester12', 'harvester02', 'harvester012']
 const roleForEachType2 = {
 
+    'harvesterM2': [WORK, MOVE, CARRY, MOVE, MOVE, WORK, CARRY, MOVE],
+    'processor2': [MOVE, CARRY],
     'builder02': [MOVE, WORK, CARRY, MOVE],
-    'builder12': [MOVE, WORK, CARRY, MOVE],
+    'builder12': [MOVE, WORK, CARRY, MOVE, WORK, CARRY],
     'upgrader02': [MOVE, WORK, CARRY, MOVE],
     'upgrader12': [MOVE, WORK, CARRY, MOVE],
     'harvesterT12': [MOVE, WORK, CARRY, MOVE],
     'harvesterT02': [MOVE, WORK, CARRY, MOVE, WORK, CARRY, MOVE, WORK, CARRY],
-    'upgraderUC2': [WORK, WORK, WORK, WORK, WORK, WORK, CARRY, MOVE],
-    'harvester12': [MOVE, WORK, CARRY, MOVE],
-    'harvester02': [MOVE, WORK, CARRY, MOVE, WORK, CARRY, MOVE, WORK, CARRY]
+    'upgraderUC2': [WORK, WORK, WORK, WORK, WORK, WORK, WORK, CARRY, MOVE, MOVE],
+    'harvester12': [MOVE, WORK, CARRY, MOVE, WORK, CARRY, MOVE, WORK, CARRY],
+    'harvester02': [MOVE, WORK, CARRY, MOVE, WORK, CARRY, MOVE, WORK, CARRY],
+    'harvester012': [MOVE, WORK, CARRY],
 
+    'urgentShifter2': [MOVE, CARRY],
+    'attacker2': [TOUGH, TOUGH, MOVE, MOVE, MOVE, ATTACK, MOVE, ATTACK, MOVE, ATTACK]
 }
 
 const source02 = Game.rooms['E29N55'].find(FIND_SOURCES)[0];
@@ -129,6 +158,58 @@ const towers2 = Game.spawns['Spawn2'].room.find(FIND_STRUCTURES, {
 });
 const towerIDs2 = ['6066b5e65abcd7285285abea', '606c30f908f9f2d043cf7a1a'];
 const containerIDs2 = ['6065c2d43bc5866af992aebd'];
+const linkIDs2 = ['606edbbdf965dd7db39966a2', '606ec5e64d24f02c2325f0ef'];
+const mineral2 = Game.spawns['Spawn2'].room.find(FIND_MINERALS)[0];
+
+
+
+//local at room3
+var numForEachType3 = {
+
+    'claimer13': 0,
+    'claimer03': 0,
+
+    'harvesterT03': 1,
+    'builder13': 2,
+    'upgrader03': 0,
+    'upgraderUL3': 1,
+    'upgrader13': 0,
+    'harvester03': 1,
+    'processor3': 1,
+    'harvester13': 2,
+    'harvester013': 1
+
+}
+const warTypes3 = ['urgentShifter3', 'harvesterT03', 'upgrader03', 'upgraderUL3', 'upgrader13', 'harvester03', 'processor3', 'harvester13', 'harvester013'];
+const roleForEachType3 = {
+
+    'urgentShifter3': [MOVE, CARRY],
+    'harvesterT03': [MOVE, MOVE, WORK, CARRY, MOVE, WORK, CARRY, MOVE, MOVE, WORK, CARRY, MOVE],
+    'builder13': [MOVE, WORK, CARRY, MOVE, MOVE, WORK, CARRY, MOVE, MOVE, WORK, CARRY, MOVE],
+    'upgrader03': [MOVE, WORK, CARRY, MOVE, MOVE, WORK, CARRY, MOVE, MOVE, WORK, CARRY, MOVE],
+    'upgraderUL3': [WORK, WORK, WORK, WORK, WORK, WORK, WORK, MOVE, MOVE, CARRY],
+    'upgrader13': [MOVE, WORK, CARRY, MOVE, MOVE, WORK, CARRY, MOVE, MOVE, WORK, CARRY, MOVE],
+    'harvester03': [WORK, WORK, WORK, WORK, WORK, WORK, CARRY, MOVE, MOVE],
+    'processor3': [CARRY, MOVE],
+    'harvester13': [MOVE, WORK, CARRY, MOVE, MOVE, WORK, CARRY, MOVE],
+    'harvester013': [MOVE, WORK, CARRY, MOVE],
+
+    'claimer13': [CLAIM, MOVE, CLAIM],
+    'claimer03': [CLAIM, MOVE, CLAIM]
+}
+
+const source03 = Game.rooms['E28N53'].find(FIND_SOURCES)[0];
+const source13 = Game.rooms['E28N53'].find(FIND_SOURCES)[1];
+const extensions3 = Game.spawns['Spawn3'].room.find(FIND_MY_STRUCTURES, {
+    filter: { structureType: STRUCTURE_EXTENSION }
+});
+const myEnergyStructures3 = [].concat(extensions3, Game.spawns['Spawn3']);
+const towers3 = Game.spawns['Spawn3'].room.find(FIND_STRUCTURES, {
+    filter: (object) => object.structureType == STRUCTURE_TOWER
+});
+const towerIDs3 = ['607dca013769c567314492a3', '608ae401790582676446c35f'];
+const containerIDs3 = [];
+const linkIDs3 = ['608a694e86dff32107b37620', '608aa6bba7fccab9a243aa44'];
 
 
 //record
@@ -137,6 +218,7 @@ var recordCounter = 0;
 //war
 var isWar1 = false;
 var isWar2 = false;
+var isWar3 = false;
 
 module.exports.loop = function () {
     if (Game.cpu.bucket == 10000) {
@@ -152,10 +234,21 @@ module.exports.loop = function () {
         numForEachType1['urgentShifter1'] = 1;
     }
 
+    if (Game.rooms['E29N54'] && Game.rooms['E29N54'].find(FIND_HOSTILE_CREEPS).length > 0) {
+        numForEachType1['harvesterLD11'] = 0;
+        numForEachType1['upgraderLD11'] = 0;
+    } else {
+        numForEachType1['harvesterLD11'] = 2;
+        numForEachType1['upgraderLD11'] = 2;
+    }
+
     //record
     if (++recordCounter == 30 && (
         console.log('** Attaks since last changed: ' + attacksSinceLastChanged + ' **') ^
-        console.log('** Energy in storage: ' + Game.rooms['E28N54'].storage.store[RESOURCE_ENERGY] + ' **') ^
+        console.log('** Energy in storage:',
+            Game.rooms['E28N54'].storage.store[RESOURCE_ENERGY],
+            Game.rooms['E29N55'].storage.store[RESOURCE_ENERGY],
+            '**') ^
         (recordCounter = 0)
     ));
 
@@ -166,6 +259,7 @@ module.exports.loop = function () {
             //console.log('Clearing non-existing creep memory:', name);
         }
     }
+
 
     //room1
     {
@@ -202,7 +296,7 @@ module.exports.loop = function () {
                     //console.log('Spawning new ' + type + ': ' + newName);
                     Game.spawns['Spawn1'].spawnCreep(roleForEachType1[type], newName,
                         {
-                            memory: { role: type },
+                            memory: { role: type, boost: false },
                             energyStructures: myEnergyStructures1
                         });
                 }
@@ -212,7 +306,7 @@ module.exports.loop = function () {
                     //console.log('Spawning new ' + type + ': ' + newName);
                     Game.spawns['Spawn1'].spawnCreep(roleForEachType1[type], newName,
                         {
-                            memory: { role: type },
+                            memory: { role: type, boost: false },
                             energyStructures: myEnergyStructures1
                         });
                 }
@@ -256,7 +350,7 @@ module.exports.loop = function () {
                 //console.log('Spawning new ' + type + ': ' + newName);
                 Game.spawns['Spawn1'].spawnCreep(roleForEachType1[type], newName,
                     {
-                        memory: { role: type },
+                        memory: { role: type, boost: false },
                         energyStructures: myEnergyStructures1
                     });
             }
@@ -278,7 +372,15 @@ module.exports.loop = function () {
 
         //lab
         Game.getObjectById(labs1[2]).runReaction(Game.getObjectById(labs1[0]), Game.getObjectById(labs1[1]));
+
+        //factory
+        if (Game.getObjectById(factory1[0]).produce(RESOURCE_CONDENSATE) == ERR_NOT_ENOUGH_RESOURCES) {
+            if (Game.getObjectById(factory1[0]).store[RESOURCE_KEANIUM_BAR] < 1000) {
+                Game.getObjectById(factory1[0]).produce(RESOURCE_KEANIUM_BAR);
+            }
+        }
     }
+
 
     //room2
     if (Game.spawns['Spawn2']) {
@@ -315,7 +417,7 @@ module.exports.loop = function () {
                 console.log('IT IS WAR !!');
                 if (!isWar2) attacksSinceLastChanged++;
                 isWar2 = true;
-                /*
+
                 //spawn the attacker creep
                 var type = 'attacker2';
                 if (_.filter(Game.creeps, (creep) => creep.memory.role == type).length < 2) {
@@ -337,7 +439,7 @@ module.exports.loop = function () {
                             energyStructures: myEnergyStructures2
                         });
                 }
-                */
+
 
                 //tower02 attack
                 for (var i in towers2) {
@@ -347,7 +449,14 @@ module.exports.loop = function () {
                 isWar2 = false;
                 //repair the damaged
                 var damagedStructure = Game.spawns['Spawn2'].room.find(FIND_STRUCTURES, {
-                    filter: object => object.hits < object.hitsMax// && (
+                    filter: object => object.hits < object.hitsMax && !(
+                        object.pos.x >= 38 &&
+                        object.pos.x <= 46 &&
+                        object.pos.y >= 19 &&
+                        object.pos.y <= 42
+                    )
+
+                    // && (
                     //object.hits < 1000000 ||
                     //object.structureType == STRUCTURE_ROAD
                     //)// && !(object.pos.x < 10 && object.structureType == STRUCTURE_WALL) //&& 
@@ -370,7 +479,7 @@ module.exports.loop = function () {
                 //console.log('Spawning new ' + type + ': ' + newName);
                 Game.spawns['Spawn2'].spawnCreep(roleForEachType2[type], newName,
                     {
-                        memory: { role: type },
+                        memory: { role: type, boost: false },
                         energyStructures: myEnergyStructures2
                     });
             }
@@ -384,6 +493,107 @@ module.exports.loop = function () {
                 { align: 'center', opacity: 0.8 });
         }
     }
+
+
+    //room3
+    if (Game.spawns['Spawn3']) {
+
+        //tower03
+        if (towers3.length) {
+            var tower03 = towers3[0];
+        }
+        if (tower03) {//ifnot tower03 then surrender
+            //attack the hostile
+            var closestHostile = tower03.pos.findClosestByRange(FIND_HOSTILE_CREEPS, {
+                filter: (target) => target.getActiveBodyparts(ATTACK) &&
+                    target.pos.x != 0 &&
+                    target.pos.x != 49 &&
+                    target.pos.y != 0 &&
+                    target.pos.y != 49
+            });
+            if (!closestHostile) {
+                closestHostile = tower03.pos.findClosestByRange(FIND_HOSTILE_CREEPS, {
+                    filter: (target) =>
+                        target.pos.x != 0 &&
+                        target.pos.x != 49 &&
+                        target.pos.y != 0 &&
+                        target.pos.y != 49
+                });
+            }
+            if (closestHostile) {
+                console.log('IT IS WAR !!');
+                if (!isWar3) attacksSinceLastChanged++;
+                isWar3 = true;
+                /*
+                //spawn the attacker creep
+                var type = 'attacker3';
+                if (_.filter(Game.creeps, (creep) => creep.memory.role == type).length < 3) {
+                    var newName = type + '_' + Game.time;
+                    //console.log('Spawning new ' + type + ': ' + newName);
+                    Game.spawns['Spawn3'].spawnCreep(roleForEachType3[type], newName,
+                        {
+                            memory: { role: type },
+                            energyStructures: myEnergyStructures3
+                        });
+                }*/
+                var type = 'urgentShifter3';
+                if (_.filter(Game.creeps, (creep) => creep.memory.role == type).length < 1) {
+                    var newName = type + '_' + Game.time;
+                    //console.log('Spawning new ' + type + ': ' + newName);
+                    Game.spawns['Spawn3'].spawnCreep(roleForEachType3[type], newName,
+                        {
+                            memory: { role: type },
+                            energyStructures: myEnergyStructures3
+                        });
+                }
+
+
+                //tower03 attack
+                for (var i in towers3) {
+                    towers3[i].attack(closestHostile);
+                }
+            } else {
+                isWar3 = false;
+                //repair the damaged
+                var damagedStructure = Game.spawns['Spawn3'].room.find(FIND_STRUCTURES, {
+                    filter: object => object.hits < object.hitsMax// && (
+                    //object.hits < 1000000 ||
+                    //object.structureType == STRUCTURE_ROAD
+                    //)// && !(object.pos.x < 10 && object.structureType == STRUCTURE_WALL) //&& 
+                    //  object.structureType != STRUCTURE_WALL //&&
+                    //  object.structureType != STRUCTURE_RAMPART
+                });
+                damagedStructure.sort((a, b) => a.hits - b.hits);
+                if (damagedStructure) {
+                    //console.log('tower01 is repairing' + damagedStructure[0]);
+                    towers3[0].repair(damagedStructure[0]);
+                }
+            }
+        }
+
+        //respawn
+        for (var type in numForEachType3) {
+            if ((!isWar3 || warTypes3.includes(type)) &&
+                _.filter(Game.creeps, (creep) => creep.memory.role == type).length < numForEachType3[type]) {
+                var newName = type + '_' + Game.time;
+                //console.log('Spawning new ' + type + ': ' + newName);
+                Game.spawns['Spawn3'].spawnCreep(roleForEachType3[type], newName,
+                    {
+                        memory: { role: type, boost: false },
+                        energyStructures: myEnergyStructures3
+                    });
+            }
+        }
+        if (Game.spawns['Spawn3'].spawning) {
+            var spawningCreep = Game.creeps[Game.spawns['Spawn3'].spawning.name];
+            Game.spawns['Spawn3'].room.visual.text(
+                '🛠️' + spawningCreep.memory.role,
+                Game.spawns['Spawn3'].pos.x,
+                Game.spawns['Spawn3'].pos.y + 2,
+                { align: 'center', opacity: 0.8 });
+        }
+    }
+
 
     //creeps
     for (var name in Game.creeps) {
@@ -471,28 +681,100 @@ module.exports.loop = function () {
             } case 'urgentShifter1': {
                 roleUrgentShifter.run(creep, [STRUCTURE_TOWER], towers1[0]); break;
             } case 'processor1': {
-                roleProcessor.run(creep, Game.getObjectById(linkIDs1[1]), Game.getObjectById(linkIDs1[0]), Game.getObjectById(linkIDs1[2])); break;
-            } case 'claimer1': {
-                roleClaimer.run(creep, 'E28N54', 'E29N55'); break;
+                roleProcessor.run(creep, Game.getObjectById(linkIDs1[1]), Game.getObjectById(linkIDs1[0]), Game.getObjectById(linkIDs1[2]), Game.getObjectById(factory1[0])); break;
+            } case 'claimer01': {
+                roleClaimer.run(creep, 'E28N54', 'E29N54'); break;
+            } case 'claimer11': {
+                roleClaimer.run(creep, 'E28N54', 'E28N55'); break;
             } case 'builderLD1': {
-                roleBuilderLongDistance.run(creep, 'E28N54', 'E29N55', source02,
-                    Game.spawns['Spawn1'].room.energyAvailable ==
-                        Game.spawns['Spawn1'].room.energyCapacityAvailable ?
+                roleBuilderLongDistance.run(creep, 'E28N54', 'E28N53', creep.room.find(FIND_SOURCES)[1],
+                    Game.spawns['Spawn3'].room.energyAvailable ==
+                        Game.spawns['Spawn3'].room.energyCapacityAvailable ?
                         [STRUCTURE_EXTENSION, STRUCTURE_SPAWN, STRUCTURE_STORAGE] :
-                        [STRUCTURE_EXTENSION, STRUCTURE_SPAWN], Game.flags.Harv2); break;
+                        [STRUCTURE_EXTENSION, STRUCTURE_SPAWN], Game.flags.Harv3); break;
             } case 'invader1': {
                 roleInvader.run(creep, 'E28N54', 'E29N54'); break;
+            } case 'defender01': {
+                roleInvader.run(creep, 'E28N54', 'E28N55'); break;
+            } case 'healer1': {
+                roleHealer.run(creep, 'E28N54', 'E28N53'); break;
             } case 'harvesterLD01': {
-                roleHarvesterLongDistance.run(creep, 'E28N54', 'E30N53', Game.rooms['E28N54'].terminal); break;
+                roleHarvesterDeposit.run(creep, Game.getObjectById(labs1[2]), 'E28N54', 'E30N55', 'E30N52', Game.rooms['E28N54'].terminal); break;
             } case 'harvesterM1': {
                 roleHarvester.run(creep, mineral1, [STRUCTURE_STORAGE], Game.flags.Rest1); break;
             } case 'harvesterLD11': {
-                roleHarvesterLongDistance.run(creep, 'E28N54', 'E29N54', Game.rooms['E28N54'].storage); break;
+                //roleHarvesterLongDistance.run(creep, 'E28N54', 'E29N54', Game.rooms['E28N54'].storage); break;
+                roleHarvesterLongDistanceBoost.run(creep, Game.getObjectById(labs1[2]), 'E28N54', 'E29N54', Game.rooms['E28N54'].storage); break;
             } case 'carrierL01': {
-                //roleCarrier.run(creep, Game.rooms['E28N54'].storage, Game.getObjectById(labs1[0]), [RESOURCE_ENERGY, RESOURCE_HYDROGEN]); break;
-                roleCarrier.run(creep, Game.rooms['E28N54'].terminal, Game.getObjectById(labs1[2]), [RESOURCE_ENERGY]); break;
-
+                if (Game.getObjectById(labs1[0]).store[RESOURCE_HYDROGEN] < 2950 &&
+                    (Game.rooms['E28N54'].storage.store[RESOURCE_HYDROGEN] > 100 || creep.store[RESOURCE_HYDROGEN]) ||
+                    Game.getObjectById(labs1[0]).store[RESOURCE_ENERGY] < 2000) {
+                    creep.say('0');
+                    if (creep.store[RESOURCE_ENERGY] + creep.store[RESOURCE_HYDROGEN] < creep.store.getUsedCapacity()) {
+                        if (creep.transfer(creep.room.terminal, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                            creep.moveTo(creep.room.terminal);
+                        } else {
+                            for (const resourceType in creep.store) {
+                                creep.transfer(creep.room.terminal, resourceType);
+                            }
+                        }
+                        break;
+                    }
+                    roleCarrier.run(creep, Game.rooms['E28N54'].storage, Game.getObjectById(labs1[0]), [RESOURCE_ENERGY, RESOURCE_HYDROGEN]); break;
+                } else if (Game.getObjectById(labs1[1]).store[RESOURCE_KEANIUM] < 2950 &&
+                    (Game.rooms['E28N54'].terminal.store[RESOURCE_KEANIUM] > 100 || creep.store[RESOURCE_KEANIUM]) ||
+                    Game.getObjectById(labs1[1]).store[RESOURCE_ENERGY] < 2000) {
+                    creep.say('1');
+                    if (creep.store[RESOURCE_ENERGY] + creep.store[RESOURCE_KEANIUM] < creep.store.getUsedCapacity()) {
+                        if (creep.transfer(creep.room.terminal, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                            creep.moveTo(creep.room.terminal);
+                        } else {
+                            for (const resourceType in creep.store) {
+                                creep.transfer(creep.room.terminal, resourceType);
+                            }
+                        }
+                        break;
+                    }
+                    roleCarrier.run(creep, Game.rooms['E28N54'].terminal, Game.getObjectById(labs1[1]), [RESOURCE_KEANIUM, RESOURCE_ENERGY]); break;
+                }
+                /*else if (Game.getObjectById(labs1[1]).store[RESOURCE_KEANIUM] < 2950 &&
+                    (Game.getObjectById(factory1[0]).store[RESOURCE_KEANIUM] > 500 || creep.store[RESOURCE_KEANIUM]) ||
+                    Game.getObjectById(labs1[1]).store[RESOURCE_ENERGY] < 2000) {
+                    creep.say('1');
+                    if (creep.store[RESOURCE_ENERGY] + creep.store[RESOURCE_KEANIUM] < creep.store.getUsedCapacity()) {
+                        if (creep.transfer(Game.getObjectById(factory1[0]), RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                            creep.moveTo(Game.getObjectById(factory1[0]));
+                        } else {
+                            for (const resourceType in creep.store) {
+                                creep.transfer(Game.getObjectById(factory1[0]), resourceType);
+                            }
+                        }
+                        break;
+                    }
+                    roleCarrier.run(creep, Game.getObjectById(factory1[0]), Game.getObjectById(labs1[1]), [RESOURCE_KEANIUM, RESOURCE_ENERGY]); break;
+                } */
+                else if (Game.getObjectById(labs1[2]).store[RESOURCE_ENERGY] < 2000) {
+                    creep.say('2');
+                    if (creep.store[RESOURCE_ENERGY] < creep.store.getUsedCapacity()) {
+                        if (creep.transfer(creep.room.terminal, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                            creep.moveTo(creep.room.terminal);
+                        } else {
+                            for (const resourceType in creep.store) {
+                                creep.transfer(creep.room.terminal, resourceType);
+                            }
+                        }
+                        break;
+                    }
+                    roleCarrier.run(creep, Game.rooms['E28N54'].terminal, Game.getObjectById(labs1[2]), [RESOURCE_ENERGY]); break;
+                }
+                break;
+                //roleCarrier.run(creep, Game.rooms['E28N54'].terminal, Game.getObjectById(labs1[1]), [RESOURCE_KEANIUM]); break;
+                //roleCarrier.run(creep, Game.getObjectById(labs1[2]), Game.rooms['E28N54'].terminal, [RESOURCE_HYDROXIDE]); break;
+            } case 'upgraderLD11': {
+                roleUpgraderLongDistanceBoost.run(creep, Game.getObjectById(labs1[2]), 'E28N54', 'E29N54', Game.rooms['E28N54'].controller); break;
             }
+
+
             //room2
             case 'harvester02': {
                 roleHarvester.run(creep, source02,
@@ -504,8 +786,16 @@ module.exports.loop = function () {
                     Game.spawns['Spawn2'].room.energyAvailable ==
                         Game.spawns['Spawn2'].room.energyCapacityAvailable ?
                         (Game.getObjectById(containerIDs2[0]).store.getFreeCapacity([RESOURCE_ENERGY]) == 0 ?
-                            [STRUCTURE_EXTENSION, STRUCTURE_SPAWN, STRUCTURE_STORAGE] :
-                            [STRUCTURE_EXTENSION, STRUCTURE_SPAWN, STRUCTURE_CONTAINER]) :
+                            [STRUCTURE_EXTENSION, STRUCTURE_SPAWN, STRUCTURE_STORAGE, STRUCTURE_LINK] :
+                            [STRUCTURE_EXTENSION, STRUCTURE_SPAWN, STRUCTURE_CONTAINER, STRUCTURE_LINK]) :
+                        [STRUCTURE_EXTENSION, STRUCTURE_SPAWN], Game.flags.Harv21); break;
+            } case 'harvester012': {
+                roleHarvester.run(creep, source12,
+                    Game.spawns['Spawn2'].room.energyAvailable ==
+                        Game.spawns['Spawn2'].room.energyCapacityAvailable ?
+                        (Game.getObjectById(containerIDs2[0]).store.getFreeCapacity([RESOURCE_ENERGY]) == 0 ?
+                            [STRUCTURE_EXTENSION, STRUCTURE_SPAWN, STRUCTURE_STORAGE, STRUCTURE_LINK] :
+                            [STRUCTURE_EXTENSION, STRUCTURE_SPAWN, STRUCTURE_CONTAINER, STRUCTURE_LINK]) :
                         [STRUCTURE_EXTENSION, STRUCTURE_SPAWN], Game.flags.Harv21); break;
             } case 'harvesterT02': {
                 if (Game.getObjectById(towerIDs2[1]).store.getFreeCapacity([RESOURCE_ENERGY]) > 0) {
@@ -559,11 +849,70 @@ module.exports.loop = function () {
                     Game.spawns['Spawn2'].room.energyAvailable ==
                         Game.spawns['Spawn2'].room.energyCapacityAvailable ?
                         (Game.getObjectById(containerIDs2[0]).store.getFreeCapacity([RESOURCE_ENERGY]) < 100 ?
-                            [STRUCTURE_EXTENSION, STRUCTURE_SPAWN, STRUCTURE_STORAGE] :
-                            [STRUCTURE_EXTENSION, STRUCTURE_SPAWN, STRUCTURE_CONTAINER]) :
+                            [STRUCTURE_EXTENSION, STRUCTURE_SPAWN, STRUCTURE_STORAGE, STRUCTURE_LINK] :
+                            [STRUCTURE_EXTENSION, STRUCTURE_SPAWN, STRUCTURE_CONTAINER, STRUCTURE_LINK]) :
                         [STRUCTURE_EXTENSION, STRUCTURE_SPAWN], Game.flags.Harv21); break;
+            } case 'processor2': {
+                if (isWar2) {
+                    roleUrgentShifter.run(creep, [STRUCTURE_TOWER]);
+                } else {
+                    roleProcessor2.run(creep, Game.getObjectById(linkIDs2[1]), Game.getObjectById(linkIDs2[0])); break;
+                }
+                break;
+            } case 'urgentShifter2': {
+                roleUrgentShifter.run(creep, [STRUCTURE_TOWER],
+                    Game.getObjectById(towerIDs2[0]).store.getUsedCapacity(RESOURCE_ENERGY) >
+                        Game.getObjectById(towerIDs2[1]).store.getUsedCapacity(RESOURCE_ENERGY) ?
+                        Game.getObjectById(towerIDs2[1]) : Game.getObjectById(towerIDs2[0])); break;
+            } case 'harvesterM2': {
+                roleHarvester.run(creep, mineral2, [STRUCTURE_TERMINAL], Game.flags.Harv2); break;
+            } case 'attacker2': {
+                roleAttacker.run(creep, Game.flags.Atk2); break;
             }
 
+
+            //room3
+            case 'upgrader03': {
+                roleUpgrader.run(creep, source03, Game.spawns['Spawn3'].room.controller, Game.spawns['Spawn3'].room.controller); break;
+            } case 'upgrader13': {
+                roleUpgrader.run(creep, source13, Game.spawns['Spawn3'].room.controller, Game.spawns['Spawn3'].room.controller); break;
+            } case 'harvester03': {
+                roleHarvester.run(creep, source03, [STRUCTURE_LINK], Game.flags.Harv30); break;
+            } case 'harvester013': {
+                roleHarvester.run(creep, source13,
+                    Game.spawns['Spawn3'].room.energyAvailable ==
+                        Game.spawns['Spawn3'].room.energyCapacityAvailable ?
+                        [STRUCTURE_EXTENSION, STRUCTURE_SPAWN, STRUCTURE_STORAGE, STRUCTURE_LINK] :
+                        [STRUCTURE_EXTENSION, STRUCTURE_SPAWN], Game.flags.Harv3); break;
+            } case 'harvester13': {
+                roleHarvester.run(creep, source13,
+                    Game.spawns['Spawn3'].room.energyAvailable ==
+                        Game.spawns['Spawn3'].room.energyCapacityAvailable ?
+                        [STRUCTURE_EXTENSION, STRUCTURE_SPAWN, STRUCTURE_STORAGE, STRUCTURE_LINK] :
+                        [STRUCTURE_EXTENSION, STRUCTURE_SPAWN], Game.flags.Harv3); break;
+            } case 'builder13': {
+                roleBuilder.run(creep, source13,
+                    Game.spawns['Spawn3'].room.energyAvailable ==
+                        Game.spawns['Spawn3'].room.energyCapacityAvailable ?
+                        [STRUCTURE_EXTENSION, STRUCTURE_SPAWN, STRUCTURE_STORAGE, STRUCTURE_LINK] :
+                        [STRUCTURE_EXTENSION, STRUCTURE_SPAWN], Game.flags.Harv3); break;
+            } case 'harvesterT03': {
+                if (Game.getObjectById(towerIDs3[0]).store.getFreeCapacity([RESOURCE_ENERGY]) > 0) {
+                    roleHarvesterTower.run(creep, source13, Game.getObjectById(towerIDs3[0]));
+                } else {
+                    roleHarvesterTower.run(creep, source13, Game.getObjectById(towerIDs3[0]));
+                } break;
+            } case 'urgentShifter3': {
+                roleUrgentShifter.run(creep, [STRUCTURE_TOWER]); break;
+            } case 'claimer03': {
+                roleClaimer.run(creep, 'E28N53', 'E29N53'); break;
+            } case 'claimer13': {
+                roleClaimer.run(creep, 'E28N53', 'E28N52'); break;
+            } case 'upgraderUL3': {
+                roleUpgraderUsingContainer.run(creep, Game.getObjectById(linkIDs3[1]), Game.flags.Upgrade3); break;
+            } case 'processor3': {
+                roleProcessor3.run(creep, Game.getObjectById(linkIDs3[1]), Game.getObjectById(linkIDs3[0])); break;
+            }
 
             default: {
                 roleHarvester.run(creep, source01,
@@ -574,4 +923,6 @@ module.exports.loop = function () {
             }
         }
     }
+
+    autoMarket.deal();
 }

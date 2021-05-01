@@ -30,7 +30,7 @@ var roleUpgraderUsingContainer = {
                         var road = creep.pos.lookFor(LOOK_STRUCTURES).filter(
                             object => object.structureType == STRUCTURE_ROAD
                         )[0];
-                        if (road.hits < road.hitsMax) {
+                        if (road && road.hits < road.hitsMax) {
                             creep.repair(road);
                         } else {
                             creep.upgradeController(creep.room.controller);

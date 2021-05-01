@@ -37,14 +37,30 @@ var roleHarvesterLongDistance = {
                 var exit1 = creep.pos.findClosestByRange(exitDir1);
                 creep.moveTo(exit1, { visualizePathStyle: { stroke: '#ffaa00' } });
             } else {
-                var source = creep.room.find(FIND_DEPOSITS)[0];
-                if (!source) {
-                    source = creep.room.find(FIND_SOURCES_ACTIVE)[0];
-                }
-                if (source) {
-                    //console.log(creep.harvest(source));
-                    if (creep.harvest(source) == ERR_NOT_IN_RANGE) {
-                        creep.moveTo(source, { visualizePathStyle: { stroke: '#ffaa00' } });
+                var target = creep.room.find(FIND_TOMBSTONES, {
+                    filter: (tombstone) => !tombstone.creep.my && tombstone.store.getUsedCapacity() > 0
+                })[0];
+                if (target) {
+                    if (creep.withdraw(target, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                        creep.moveTo(target, { visualizePathStyle: { stroke: '#ffffff' } });
+                    }
+                    for (const resourceType in target.store) {
+                        if (resourceType != RESOURCE_ENERGY) {
+                            if (creep.withdraw(target, resourceType) == ERR_NOT_IN_RANGE) {
+                                creep.moveTo(target, { visualizePathStyle: { stroke: '#ffffff' } });
+                            }
+                        }
+                    }
+                } else {
+                    var source = creep.room.find(FIND_DEPOSITS)[0];
+                    if (!source) {
+                        source = creep.room.find(FIND_SOURCES_ACTIVE)[0];
+                    }
+                    if (source) {
+                        //console.log(creep.harvest(source));
+                        if (creep.harvest(source) == ERR_NOT_IN_RANGE) {
+                            creep.moveTo(source, { visualizePathStyle: { stroke: '#ffaa00' } });
+                        }
                     }
                 }
             }

@@ -20,11 +20,11 @@ var roleUpgraderUsingLink = {
             }
 
             if (creep.memory.upgrading) {
-                Math.random() > 0.7 ?
-                    creep.upgradeController(creep.room.controller) :
-                    creep.repair(Game.getObjectById(repairTargetIDs[
-                        Game.getObjectById(repairTargetIDs[0]).hits < Game.getObjectById(repairTargetIDs[1]).hits ?
-                            0 : 1]));
+                var targets = [Game.getObjectById(repairTargetIDs[0]), Game.getObjectById(repairTargetIDs[1])];
+                (targets[0].hits < targets[0].hitsMax || targets[1].hits < targets[1].hitsMax) &&
+                    Math.random() > 0.7 ?
+                    creep.repair(targets[0].hits < targets[1].hits ? targets[0] : targets[1]) :
+                    creep.upgradeController(creep.room.controller);
             }
             else {
                 creep.withdraw(link, RESOURCE_ENERGY);
