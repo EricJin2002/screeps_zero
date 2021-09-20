@@ -1,4 +1,4 @@
-var roleClaimer = {
+var roleReserver = {
     run: function (creep, homeRoomIndex, targetRoomIndex) {
         if (creep.room.name != targetRoomIndex) {
             const exitDir = creep.room.findExitTo(targetRoomIndex);
@@ -8,6 +8,8 @@ var roleClaimer = {
             if(creep.reserveController(creep.room.controller)==ERR_NOT_IN_RANGE){
                 creep.moveTo(creep.room.controller);
             }
+            //console.log(creep.signController(creep.room.controller, '物競，天擇，效實，儲能'));
+            /*
             if (!creep.memory.claimed && creep.room.controller) {
                 if (creep.claimController(creep.room.controller) == ERR_NOT_IN_RANGE) {
                     creep.moveTo(creep.room.controller);
@@ -21,8 +23,8 @@ var roleClaimer = {
                         creep.moveTo(creep.room.controller);
                     }
                 }
-            }
+            }*/
         }
     }
 }
-module.exports = roleClaimer;
+module.exports = roleReserver;

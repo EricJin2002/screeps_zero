@@ -28,7 +28,7 @@ var roleHarvester = {
                         creep.moveTo(target, { visualizePathStyle: { stroke: '#ffffff' } });
                     }
                 }
-            } else {
+            } else if (restFlag) {
                 creep.moveTo(restFlag);
             }
         }

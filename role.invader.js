@@ -14,7 +14,8 @@ var roleInvader = {
             } else {
                 var target = creep.pos.findClosestByRange(FIND_STRUCTURES, {
                     filter: (t) => t.structureType != STRUCTURE_CONTROLLER &&
-                        t.structureType != STRUCTURE_SPAWN// &&
+                        t.structureType != STRUCTURE_SPAWN &&
+                        t.structureType != STRUCTURE_WALL
                         //t.structureType != STRUCTURE_EXTENSION
                 });
                 //target = Game.getObjectById('5fcc92ffe051e63cc3a4a44f');

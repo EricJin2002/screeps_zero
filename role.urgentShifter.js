@@ -25,7 +25,7 @@ var roleUrgentShifter = {
                     creep.moveTo(target, { visualizePathStyle: { stroke: '#ffffff' } });
                 }
             } else {
-                creep.moveTo(creep.room.find(FIND_FLAGS)[3]);
+                //creep.moveTo(creep.room.find(FIND_FLAGS)[3]);
             }
         }
     }
